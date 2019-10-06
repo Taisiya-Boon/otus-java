@@ -1,4 +1,4 @@
-package main.java.ru.otus;
+package ru.otus;
 
 import com.google.common.math.IntMath;
 
