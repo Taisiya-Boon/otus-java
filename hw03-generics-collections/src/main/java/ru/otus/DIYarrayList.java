@@ -1,25 +1,34 @@
 package ru.otus;
 
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.function.UnaryOperator;
 import java.util.Arrays;
 import java.util.Comparator;
+import com.google.common.math.IntMath;
 
 public class DIYarrayList<T> implements List<T> {
 
-    private int size;
+    private int size; // количество доступных ячеек в массиве.
+
+    private int realSize = 16; // реальное количсетво ячеек в массиве.
 
     private Object[] baseArrayList;
 
     public DIYarrayList() {
-        this.baseArrayList = new Object[0];
+        this.baseArrayList = new Object[realSize];
         this.size = 0;
     }
 
     public DIYarrayList(int sizeNewDIYarrayList) {
         if ( sizeNewDIYarrayList >= 0 ) {
-            this.baseArrayList = new Object[sizeNewDIYarrayList];
-            this.size = sizeNewDIYarrayList;
+            if ( sizeNewDIYarrayList >= realSize ) {
+                this.baseArrayList = new Object[sizeNewDIYarrayList];
+                this.size = sizeNewDIYarrayList;
+            } else {
+                this.baseArrayList = new Object[realSize];
+                this.size = sizeNewDIYarrayList;
+            }
         } else {
             throw new UnsupportedOperationException();
         }
@@ -72,17 +81,23 @@ public class DIYarrayList<T> implements List<T> {
 
     @Override
     public boolean add(T t) {
-        Object[] buffer = this.toArray();
-        baseArrayList = new Object[size+1];
-        for ( int i = 0 ; i < ( size + 1 ) ; i++ ) {
-            if ( i != size ) {
-                baseArrayList[i] = buffer[i];
-            } else {
-                baseArrayList[i] = t;
+        if ( (size+1) <= realSize ) {
+            baseArrayList[size+1] = t;
+            return true;
+        } else {
+            realSize *= 2;
+            Object[] buffer = this.toArray();
+            baseArrayList = new Object[size + 1];
+            for (int i = 0; i < (size + 1); i++) {
+                if (i != size) {
+                    baseArrayList[i] = buffer[i];
+                } else {
+                    baseArrayList[i] = t;
+                }
             }
+            size++;
+            return true;
         }
-        size++;
-        return true;
     }
 
     @Override
@@ -99,17 +114,26 @@ public class DIYarrayList<T> implements List<T> {
     public boolean addAll(Collection<? extends T> c) {
         int cSize = c.toArray().length;
         Object[] cArray = c.toArray();
-        Object[] buffer = this.toArray();
-        baseArrayList = new Object[size+cSize];
-        for ( int i = 0 ; i < ( size + cSize ) ; i++ ) {
-            if ( i < size ) {
-                baseArrayList[i] = buffer[i];
-            } else {
-                baseArrayList[i] = cArray[i-size];
+        if ( size+cSize <= realSize ) {
+            for (int i = 0; i < cSize; i++) {
+                baseArrayList[size+1+i] = cArray[i];
             }
+            size += cSize;
+            return true;
+        } else {
+            realSize = IntMath.pow(realSize, IntMath.log2( ( ( cSize + size ) / realSize ), RoundingMode.CEILING ) );
+            Object[] buffer = this.toArray();
+            baseArrayList = new Object[realSize];
+            for (int i = 0; i < (size + cSize); i++) {
+                if (i < size) {
+                    baseArrayList[i] = buffer[i];
+                } else {
+                    baseArrayList[i] = cArray[i - size];
+                }
+            }
+            size += cSize;
+            return true;
         }
-        size += cSize;
-        return true;
     }
 
     @Override
@@ -163,16 +187,29 @@ public class DIYarrayList<T> implements List<T> {
 
     @Override
     public void add(int index, T element) {
-        Object[] buffer = this.toArray();
-        baseArrayList = new Object[size+1];
-        for ( int i = 0 ; i < ( size + 1 ) ; i++ ) {
-            if ( i != index ) {
-                baseArrayList[i] = buffer[i];
-            } else {
-                baseArrayList[i] = element;
+        if ( (size+1) <= realSize ) {
+            for ( int i = size ; i >= index ; i-- ) {
+                if ( i != index ) {
+                    baseArrayList[i] = baseArrayList[i-1];
+                } else {
+                    baseArrayList[i] = element;
+                }
             }
+            size++;
+        } else {
+            realSize *= 2;
+            Object[] buffer = this.toArray();
+            baseArrayList = new Object[size+1];
+            for ( int i = 0 ; i < ( size + 1 ) ; i++ ) {
+                if ( i != index ) {
+                    baseArrayList[i] = buffer[i];
+                } else {
+                    baseArrayList[i] = element;
+                }
+            }
+            size++;
         }
-        size++;
+
     }
 
     @Override
