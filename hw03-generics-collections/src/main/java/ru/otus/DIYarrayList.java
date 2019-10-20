@@ -30,7 +30,7 @@ public class DIYarrayList<T> implements List<T> {
                 this.size = sizeNewDIYarrayList;
             }
         } else {
-            throw new UnsupportedOperationException();
+            throw new IllegalArgumentException();
         }
     }
 
@@ -83,11 +83,12 @@ public class DIYarrayList<T> implements List<T> {
     public boolean add(T t) {
         if ( (size+1) <= realSize ) {
             baseArrayList[size+1] = t;
+            size++;
             return true;
         } else {
             realSize *= 2;
             Object[] buffer = this.toArray();
-            baseArrayList = new Object[size + 1];
+            baseArrayList = new Object[realSize];
             for (int i = 0; i < (size + 1); i++) {
                 if (i != size) {
                     baseArrayList[i] = buffer[i];
