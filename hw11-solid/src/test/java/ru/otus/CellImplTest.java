@@ -7,34 +7,34 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Тест класса Call ")
-class CellTest {
+class CellImplTest {
 
     private static final int PAR_BANKNOTE = 100;
     private static final int QUANTITY = 3;
 
-    private Cell cell;
+    private CellImpl cellImpl;
 
     @BeforeEach
     void SetUp() {
-        cell = new Cell(PAR_BANKNOTE);
-        cell.setQuantity(QUANTITY);
+        cellImpl = new CellImpl(PAR_BANKNOTE);
+        cellImpl.setQuantity(QUANTITY);
     }
 
     @Test
     @DisplayName("должен добавлять банкноту в ячейку")
     void addBanknote() {
-        int quantity = cell.getQuantity();
+        int quantity = cellImpl.getQuantity();
 
-        cell.addBanknote();
+        cellImpl.addBanknote();
 
-        assertEquals(quantity+1, cell.getQuantity());
+        assertEquals(quantity+1, cellImpl.getQuantity());
     }
 
     @Test
     @DisplayName("должен выдавать заданое количество купюр нужного номинала")
     void takeBanknote() {
-        int banknote = cell.getQuantity() - 1;
-        int money = cell.takeBanknote(banknote);
+        int banknote = cellImpl.getQuantity() - 1;
+        int money = cellImpl.takeBanknote(banknote);
 
         assertEquals(banknote*PAR_BANKNOTE, money);
     }
@@ -42,7 +42,7 @@ class CellTest {
     @Test
     @DisplayName("должен выдавать ошибку 'Нет столько банкнот'")
     void noTakeBanknote() {
-        assertThrows(IndexOutOfBoundsException.class, () -> cell.takeBanknote(cell.getQuantity()+3), "Нет столько банкнот");
+        assertThrows(IndexOutOfBoundsException.class, () -> cellImpl.takeBanknote(cellImpl.getQuantity()+3), "Нет столько банкнот");
     }
 
 }
