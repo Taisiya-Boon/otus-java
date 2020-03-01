@@ -3,15 +3,15 @@ package ru.otus;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
 class CellImpl implements Cell {
 
-    private final int parBanknote;
+    private final ParBanknote parBanknote;
 
+    @Getter
     @Setter
     private int quantity;
 
-    CellImpl(int parBanknote){
+    CellImpl(ParBanknote parBanknote){
         this.parBanknote = parBanknote;
         this.quantity = 0;
     }
@@ -27,9 +27,12 @@ class CellImpl implements Cell {
             throw new IndexOutOfBoundsException("Нет столько банкнот");
         } else {
             quantity -= quantityBanknote;
-            return quantityBanknote * parBanknote;
+            return quantityBanknote * parBanknote.getPar();
         }
     }
 
+    public int getParBanknote() {
+        return parBanknote.getPar();
+    }
 }
 

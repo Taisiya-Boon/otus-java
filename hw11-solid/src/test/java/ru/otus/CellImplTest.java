@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("Тест класса Call ")
 class CellImplTest {
 
-    private static final int PAR_BANKNOTE = 100;
+    private static final ParBanknote PAR_BANKNOTE = ParBanknote.ONE_HUNDRED;
     private static final int QUANTITY = 3;
 
     private CellImpl cellImpl;
@@ -36,7 +36,7 @@ class CellImplTest {
         int banknote = cellImpl.getQuantity() - 1;
         int money = cellImpl.takeBanknote(banknote);
 
-        assertEquals(banknote*PAR_BANKNOTE, money);
+        assertEquals(banknote*PAR_BANKNOTE.getPar(), money);
     }
 
     @Test

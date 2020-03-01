@@ -4,6 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Тест класса ATM ")
@@ -24,14 +27,18 @@ class ATMImplTest {
     @DisplayName("должен принять банкноты и положить их в соотвествующие ячейки")
     void addMoney() {
         int[] userMoney = {10, 50, 100, 100, 10, 1000, 10};
+        ArrayList quantityBanknotes = new ArrayList();
+        ArrayList atmMoney;
 
-        int[] atmMoney = atmImpl.addMoney(userMoney);
+
+        atmMoney = atmImpl.addMoney(userMoney);
         quantityBanknote[0] += 3;
         quantityBanknote[1] += 1;
         quantityBanknote[2] += 2;
         quantityBanknote[4] += 1;
+        Collections.addAll(quantityBanknotes, quantityBanknote);
 
-        assertArrayEquals(quantityBanknote, atmMoney);
+        assertArrayEquals(quantityBanknotes.toArray(), atmMoney.toArray());
     }
 
     @Test
@@ -43,9 +50,12 @@ class ATMImplTest {
     @Test
     @DisplayName("должен выдать заданную сумму имеющимися банкнотами")
     void takeMoney() {
-        int[] buffer = atmImpl.takeMoney(3100);
+        ArrayList result = new ArrayList(6);
+        Collections.addAll(result, new int[]{0, 2, 0, 2, 2, 0});
 
-        assertArrayEquals(new int[]{0, 2, 0, 2, 2, 0}, buffer);
+        ArrayList buffer = atmImpl.takeMoney(3100);
+
+        assertArrayEquals(result.toArray(), buffer.toArray());
     }
 
     @Test

@@ -1,5 +1,8 @@
 package ru.otus;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 public class ATMImpl implements ATM {
 
     private CellImpl[] cellMasses;
@@ -10,7 +13,7 @@ public class ATMImpl implements ATM {
         } else {
             cellMasses = new CellImpl[quantity.length];
             for (int i = 0; i < cellMasses.length; i++) {
-                cellMasses[i] = new CellImpl(parBanknotes[i].getPar());
+                cellMasses[i] = new CellImpl(parBanknotes[i]);
                 cellMasses[i].setQuantity(quantity[i]);
             }
         }
@@ -25,7 +28,7 @@ public class ATMImpl implements ATM {
     }
 
     @Override
-    public int [] addMoney(int... money) {
+    public ArrayList addMoney(int... money) {
         boolean flag = false;
         for (int banknote : money) {
             for (CellImpl cell : cellMasses) {
@@ -39,11 +42,13 @@ public class ATMImpl implements ATM {
             }
         }
         System.out.println("Операция прошла успешно");
-        return this.quantityBanknoteInCell();
+        ArrayList result = new ArrayList();
+        Collections.addAll(result, this.quantityBanknoteInCell());
+        return result;
     }
 
     @Override
-    public int[] takeMoney(int amountMoney) {
+    public ArrayList takeMoney(int amountMoney) {
         if (amountMoney <= 0) {
             throw new IllegalArgumentException("Запросите положительное число банкнот.");
         }
@@ -69,7 +74,9 @@ public class ATMImpl implements ATM {
                 i++;
             }
             System.out.println("Выданы средства в количестве: " + sum);
-            return quantity;
+            ArrayList result = new ArrayList();
+            Collections.addAll(result, quantity);
+            return result;
         }
     }
 
