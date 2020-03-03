@@ -13,6 +13,7 @@
     <modules>
         <module>hw01-maven</module>
         <module>hw03-generics-collections</module>
+        <module>hw11-solid</module>
     </modules>
 
     <properties>
@@ -21,6 +22,15 @@
         <maven.compiler.target>12</maven.compiler.target>
         <com.google.guava.version>28.1-jre</com.google.guava.version>
         <org.apache.maven.plugins.version>3.1.1</org.apache.maven.plugins.version>
+
+        <lombok.version>1.18.10</lombok.version>
+        <lombok-maven-plugin.version>1.18.8.1</lombok-maven-plugin.version>
+        <lombok.verbose>true</lombok.verbose>
+        <lombok.addOutputDirectory>false</lombok.addOutputDirectory>
+        <lombok.sourceDirectory>${project.basedir}/src/main/java</lombok.sourceDirectory>
+        <lombok.testSourceDirectory>${project.basedir}/src/test/java</lombok.testSourceDirectory>
+
+        <junit.jupiter.version>5.3.2</junit.jupiter.version>
     </properties>
 
     <dependencyManagement>
@@ -29,6 +39,25 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${com.google.guava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+                <scope>provided</scope>
+                <optional>true</optional>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-api</artifactId>
+                <version>${junit.jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-engine</artifactId>
+                <version>${junit.jupiter.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -40,6 +69,32 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-assembly-plugin</artifactId>
                     <version>${org.apache.maven.plugins.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.projectlombok</groupId>
+                    <artifactId>lombok-maven-plugin</artifactId>
+                    <version>${lombok-maven-plugin.version}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </dependency>
+                    </dependencies>
+                    <executions>
+                        <execution>
+                            <id>delombok</id>
+                            <goals>
+                              <goal>delombok</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>test-delombok</id>
+                            <goals>
+                              <goal>testDelombok</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
