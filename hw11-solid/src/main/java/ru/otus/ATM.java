@@ -1,12 +1,12 @@
 package ru.otus;
 
-import java.util.ArrayList;
+import java.util.Collection;
 
 public interface ATM {
 
-    public ArrayList addMoney(int... money);
+    public Collection addMoney(int... money);
 
-    public ArrayList takeMoney(int amountMoney);
+    public Collection takeMoney(int amountMoney);
 
     public int sumOut();
 
