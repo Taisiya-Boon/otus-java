@@ -22,19 +22,17 @@ public class DepartmentATM implements Department {
     @Override
     public int sumTheResiduals() {
         int sum = 0;
-        for(int i = 0; i < atms.size(); i++) {
-            sum += atms.get(i).onUpdate(Opcode.RETURN_SUM);
+        for(Listener listener: atms) {
+            sum += listener.onUpdate(Opcode.RETURN_SUM);
         }
-//        int sum = atms.stream().mapToInt(atms -> atms.onUpdate(Opcode.RETURN_SUM)).sum();
         return sum;
     }
 
     @Override
     public void initialState() {
-        for(int i = 0; i < atms.size(); i++) {
-            atms.get(i).onUpdate(Opcode.RETURN_INITIAL_STATE);
+        for(Listener listener: atms) {
+            listener.onUpdate(Opcode.RETURN_INITIAL_STATE);
         }
-//        atms.stream().map(atms -> atms.onUpdate(Opcode.RETURN_INITIAL_STATE));
     }
 
 }

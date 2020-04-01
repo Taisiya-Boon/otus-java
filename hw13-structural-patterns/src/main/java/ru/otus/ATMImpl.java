@@ -2,19 +2,19 @@ package ru.otus;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class ATMImpl implements ATM {
 
-    private CellImpl[] cellMasses;
+    private List<CellImpl> cellMasses = new ArrayList<>();
 
     public ATMImpl(int[] quantity, ParBanknote[] parBanknotes){
         if (quantity.length != parBanknotes.length) {
             throw new IndexOutOfBoundsException("Недостаточное количество данных, для создания банкомата./nВведите числа означающие количество банкнот соответствующих номиналов");
         } else {
-            cellMasses = new CellImpl[quantity.length];
-            for (int i = 0; i < cellMasses.length; i++) {
-                cellMasses[i] = new CellImpl(parBanknotes[i]);
-                cellMasses[i].setQuantity(quantity[i]);
+            for (int i = 0; i < quantity.length; i++) {
+                cellMasses.add(new CellImpl(parBanknotes[i]));
+                cellMasses.get(i).setQuantity(quantity[i]);
             }
         }
     }
@@ -24,48 +24,26 @@ public class ATMImpl implements ATM {
         if (atm.quantityBanknoteInCell().length != atm.parBanknoteInCell().length) {
             throw new IndexOutOfBoundsException("Недостаточное количество данных, для создания банкомата./nВведите числа означающие количество банкнот соответствующих номиналов");
         } else {
-            cellMasses = new CellImpl[atm.quantityBanknoteInCell().length];
-            for (int i = 0; i < cellMasses.length; i++) {
-                cellMasses[i] = new CellImpl(atm.parBanknoteInCell()[i]);
-                cellMasses[i].setQuantity(atm.quantityBanknoteInCell()[i]);
+            for (int i = 0; i < atm.quantityBanknoteInCell().length; i++) {
+                cellMasses.add(new CellImpl(atm.parBanknoteInCell()[i]));
+                cellMasses.get(i).setQuantity(atm.quantityBanknoteInCell()[i]);
             }
         }
     }
 
     private int[] quantityBanknoteInCell() {
-        int[] quantity = new int[cellMasses.length];
-        for (int i = 0; i < cellMasses.length; i++) {
-            quantity[i] = cellMasses[i].getQuantity();
+        int[] quantity = new int[cellMasses.size()];
+        for (int i = 0; i < cellMasses.size(); i++) {
+            quantity[i] = cellMasses.get(i).getQuantity();
         }
         return quantity;
     }
 
     //new
     private ParBanknote[] parBanknoteInCell() {
-        ParBanknote[] par = new ParBanknote[cellMasses.length];
-        for (int i = 0; i < cellMasses.length; i++) {
-            switch (cellMasses[i].getParBanknote()) {
-                case 10:
-                    par[i] = ParBanknote.TEN;
-                    break;
-                case 50:
-                    par[i] = ParBanknote.FIFTY;
-                    break;
-                case 100:
-                    par[i] = ParBanknote.ONE_HUNDRED;
-                    break;
-                case 500:
-                    par[i] = ParBanknote.FIVE_HUNDRED;
-                    break;
-                case 1000:
-                    par[i] = ParBanknote.THOUSAND;
-                    break;
-                case 5000:
-                    par[i] = ParBanknote.FIVE_THOUSAND;
-                    break;
-                default:
-                    throw new IllegalArgumentException("Нет банкноты твкого номинала.");
-            }
+        ParBanknote[] par = new ParBanknote[cellMasses.size()];
+        for (int i = 0; i < cellMasses.size(); i++) {
+            par[i] = cellMasses.get(i).getParBanknote();
         }
         return par;
     }
@@ -75,7 +53,7 @@ public class ATMImpl implements ATM {
         boolean flag = false;
         for (int banknote : money) {
             for (CellImpl cell : cellMasses) {
-                if (banknote == cell.getParBanknote()) {
+                if (banknote == cell.getParBanknote().getPar()) {
                     cell.addBanknote();
                     flag = true;
                 }
@@ -95,15 +73,15 @@ public class ATMImpl implements ATM {
         if (amountMoney <= 0) {
             throw new IllegalArgumentException("Запросите положительное число банкнот.");
         }
-        int[] quantity = new int[cellMasses.length];
-        for (int i = cellMasses.length-1; i >= 0; i--){
+        int[] quantity = new int[cellMasses.size()];
+        for (int i = cellMasses.size()-1; i >= 0; i--){
             if (amountMoney > 0) {
-                if (amountMoney >= cellMasses[i].getParBanknote()) {
-                    quantity[i] = amountMoney / cellMasses[i].getParBanknote();
-                    if (quantity[i] > cellMasses[i].getQuantity()) {
-                        quantity[i] = cellMasses[i].getQuantity();
+                if (amountMoney >= cellMasses.get(i).getParBanknote().getPar()) {
+                    quantity[i] = amountMoney / cellMasses.get(i).getParBanknote().getPar();
+                    if (quantity[i] > cellMasses.get(i).getQuantity()) {
+                        quantity[i] = cellMasses.get(i).getQuantity();
                     }
-                    amountMoney -= cellMasses[i].getParBanknote() * quantity[i];
+                    amountMoney -= cellMasses.get(i).getParBanknote().getPar() * quantity[i];
                 }
             }
         }
@@ -127,7 +105,7 @@ public class ATMImpl implements ATM {
     public int sumOut() {
         int sum = 0;
         for (CellImpl c : cellMasses) {
-            sum += c.getQuantity()*c.getParBanknote();
+            sum += c.getQuantity()*c.getParBanknote().getPar();
         }
         System.out.println("Сумма средств в банкомате:" + sum);
         return sum;
