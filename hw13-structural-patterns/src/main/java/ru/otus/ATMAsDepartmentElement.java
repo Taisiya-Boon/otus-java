@@ -2,7 +2,7 @@ package ru.otus;
 
 import lombok.Getter;
 
-public class ATMAsDepartmentElement implements Listener {
+public class ATMAsDepartmentElement implements Listener, ATMDepartmentAdapter {
 
     @Getter
     private ATMImpl atm;
