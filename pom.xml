@@ -14,6 +14,7 @@
         <module>hw01-maven</module>
         <module>hw03-generics-collections</module>
         <module>hw11-solid</module>
+        <module>hw13-structural-patterns</module>
     </modules>
 
     <properties>
