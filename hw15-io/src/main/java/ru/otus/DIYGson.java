@@ -1,10 +1,8 @@
 package ru.otus;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 public class DIYGson {
@@ -28,8 +26,8 @@ public class DIYGson {
         } else if (obj.getClass() == ArrayList.class) {
             ArrayList arrayList = (ArrayList) obj;
             arraysAndListToJson(arrayList.toArray());
-        } else if (obj.getClass() == Map.class) {
-            mapToJson((Map) obj);
+        } else if (obj.getClass() == HashMap.class) {
+            mapToJson((HashMap) obj);
         } else {
             jsonString.append("{");
             for (Field field : obj.getClass().getDeclaredFields()) {
@@ -54,11 +52,11 @@ public class DIYGson {
                     } catch (IllegalAccessException e) {
                         e.printStackTrace();
                     }
-                } else if (field.getType() == Map.class) {
+                } else if (field.getType() == HashMap.class) {
                     jsonString.append("\"" + field.getName() + "\":");
                     try {
                         field.setAccessible(true);
-                        Map map = (Map) field.get(obj);
+                        HashMap map = (HashMap) field.get(obj);
                         mapToJson(map);
                         field.setAccessible(false);
                     } catch (IllegalAccessException e) {
@@ -95,11 +93,11 @@ public class DIYGson {
         for (int i = 0; i < array.length; i++) {
             if (i != 0) jsonString.append(",");
             if (array[i].getClass() == String.class) {
-                jsonString.append("{\"" + array[1] + "\"}");
+                jsonString.append("\"" + array[i] + "\"");
             } else if (array[i].getClass() == Object.class) {
                 toJson(array[i]);
             } else {
-                jsonString.append(array[1]);
+                jsonString.append(array[i]);
             }
         }
         jsonString.append("]");
@@ -112,7 +110,7 @@ public class DIYGson {
             if (firstField == false) {
                 jsonString.append(",");
             }
-            jsonString.append("{\"" + key + "\":" + toJson(value) + "}");
+            jsonString.append("\"" + key + "\":\"" + value + "\"");
             firstField = false;
         });
         jsonString.append("}");
