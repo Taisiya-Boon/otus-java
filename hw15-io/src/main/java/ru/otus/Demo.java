@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Demo {
 
@@ -60,8 +61,7 @@ public class Demo {
     }
 
     private static void toJsonMap() {
-//        DIYGson gson = new DIYGson();
-        Gson gson = new Gson();
+        DIYGson gson = new DIYGson();
         HashMap obj = new HashMap();
         obj.put(1, "value1");
         obj.put(2, "value2");
