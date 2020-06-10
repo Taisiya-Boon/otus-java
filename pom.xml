@@ -15,6 +15,7 @@
         <module>hw03-generics-collections</module>
         <module>hw11-solid</module>
         <module>hw13-structural-patterns</module>
+        <module>hw09-annotations</module>
     </modules>
 
     <properties>
