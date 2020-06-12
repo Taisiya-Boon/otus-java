@@ -14,9 +14,7 @@ public class DIYTestFramework {
 
     private final HashMap<Method, Annotation> methodAnnotationHashMap = new HashMap<>();
 
-    private int beforeFlag = 0;
     private int testFlag = 0;
-    private int afterFlag = 0;
     private  boolean testFellFlag = false;
 
     private int theTestPassed = 0;
@@ -25,74 +23,87 @@ public class DIYTestFramework {
     public <T> void run(T object) {
 
         for (Method method : object.getClass().getMethods()) {
-            if (method.isAnnotationPresent(Before.class)) {
-                beforeFlag++;
-                methodAnnotationHashMap.put(method, method.getAnnotation(Before.class));
-            } else if (method.isAnnotationPresent(Test.class)) {
-                testFlag++;
-                methodAnnotationHashMap.put(method, method.getAnnotation(Test.class));
-            } else if (method.isAnnotationPresent(After.class)) {
-                afterFlag++;
-                methodAnnotationHashMap.put(method, method.getAnnotation(After.class));
-            }
+            searchAnnotation(method, methodAnnotationHashMap);
         }
 
-        if (beforeFlag * testFlag * afterFlag != 0) {
+        if (testFlag != 0) {
             while (testFlag != 0) {
                 testFellFlag = false;
-
-                for (Map.Entry<Method, Annotation> method : methodAnnotationHashMap.entrySet()) {
-                    if (method.getValue() == (method.getKey().getAnnotation(Before.class))) {
-                        try {
-                            method.getKey().invoke(null);
-                        } catch (IllegalAccessException | InvocationTargetException e) {
-                            System.out.println("Test Fell");
-                            theTestFell++;
-                            testFellFlag = true;
-                            break;
-                        }
-                    }
-                }
-                for (Map.Entry<Method, Annotation> method : methodAnnotationHashMap.entrySet()) {
-                    if (!testFellFlag) {
-                        if (method.getValue() == (method.getKey().getAnnotation(Test.class))) {
-                            try {
-                                method.getKey().invoke(null);
-                                theTestPassed++;
-                            } catch (Exception e) {
-                                System.out.println("Test Fell");
-                                theTestFell++;
-                            }
-                            methodAnnotationHashMap.remove(method.getKey());
-                            testFlag--;
-                            break;
-                        }
-                    } else {
-                        break;
-                    }
-                }
-                for (Map.Entry<Method, Annotation> method : methodAnnotationHashMap.entrySet()) {
-                    if (!testFellFlag) {
-                        if (method.getValue() == (method.getKey().getAnnotation(After.class))) {
-                            try {
-                                method.getKey().invoke(null);
-                            } catch (IllegalAccessException | InvocationTargetException e) {
-                                System.out.println("Test Fell");
-                                theTestFell++;
-                            }
-                        }
-                    } else {
-                        break;
-                    }
-                }
+                runAnnotatedMethodBefore(methodAnnotationHashMap);
+                runAnnotatedMethodTest(methodAnnotationHashMap);
+                runAnnotatedMethodAfter(methodAnnotationHashMap);
             }
         } else {
-            System.out.println("object class haven't annotations before, test or after");
+            System.out.println("object class haven't annotation test");
         }
 
         System.out.println("the Test Passed: " + theTestPassed);
         System.out.println("the Test Fell: " + theTestFell);
 
+    }
+
+    private void searchAnnotation(Method method, HashMap<Method, Annotation> hashMap) {
+        if (method.isAnnotationPresent(Before.class)) {
+            hashMap.put(method, method.getAnnotation(Before.class));
+        } else if (method.isAnnotationPresent(Test.class)) {
+            testFlag++;
+            hashMap.put(method, method.getAnnotation(Test.class));
+        } else if (method.isAnnotationPresent(After.class)) {
+            hashMap.put(method, method.getAnnotation(After.class));
+        }
+    }
+
+    private void runAnnotatedMethodBefore(HashMap<Method, Annotation> hashMap) {
+        for (Map.Entry<Method, Annotation> method : hashMap.entrySet()) {
+            if (method.getValue() == (method.getKey().getAnnotation(Before.class))) {
+                try {
+                    method.getKey().invoke(null);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    System.out.println("Test Fell");
+                    theTestFell++;
+                    testFellFlag = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    private void runAnnotatedMethodTest(HashMap<Method, Annotation> hashMap) {
+        for (Map.Entry<Method, Annotation> method : hashMap.entrySet()) {
+            if (!testFellFlag) {
+                if (method.getValue() == (method.getKey().getAnnotation(Test.class))) {
+                    try {
+                        method.getKey().invoke(null);
+                        theTestPassed++;
+                    } catch (Exception e) {
+                        System.out.println("Test Fell");
+                        theTestFell++;
+                    }
+                    hashMap.remove(method.getKey());
+                    testFlag--;
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+    }
+
+    private void runAnnotatedMethodAfter(HashMap<Method, Annotation> hashMap) {
+        for (Map.Entry<Method, Annotation> method : hashMap.entrySet()) {
+            if (!testFellFlag) {
+                if (method.getValue() == (method.getKey().getAnnotation(After.class))) {
+                    try {
+                        method.getKey().invoke(null);
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        System.out.println("Test Fell");
+                        theTestFell++;
+                    }
+                }
+            } else {
+                break;
+            }
+        }
     }
 
 }

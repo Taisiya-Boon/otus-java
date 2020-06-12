@@ -11,7 +11,7 @@ public class DIYTestFreworkDemo {
         System.out.println();
         test3();
         System.out.println();
-        test4(); // "object class haven't annotations before, test or after"
+        test4(); // "object class haven't annotation test"
         System.out.println();
         test5();
         System.out.println();
