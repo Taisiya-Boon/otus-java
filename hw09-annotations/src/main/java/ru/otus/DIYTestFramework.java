@@ -29,9 +29,15 @@ public class DIYTestFramework {
         if (testFlag != 0) {
             while (testFlag != 0) {
                 testFellFlag = false;
-                runAnnotatedMethodBefore(methodAnnotationHashMap);
-                runAnnotatedMethodTest(methodAnnotationHashMap);
-                runAnnotatedMethodAfter(methodAnnotationHashMap);
+                Object obj = null;
+                try {
+                    obj = object.getClass().getDeclaredConstructors()[0].newInstance();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                runAnnotatedMethodBefore(methodAnnotationHashMap, obj);
+                runAnnotatedMethodTest(methodAnnotationHashMap, obj);
+                runAnnotatedMethodAfter(methodAnnotationHashMap, obj);
             }
         } else {
             System.out.println("object class haven't annotation test");
@@ -53,13 +59,13 @@ public class DIYTestFramework {
         }
     }
 
-    private void runAnnotatedMethodBefore(HashMap<Method, Annotation> hashMap) {
+    private void runAnnotatedMethodBefore(HashMap<Method, Annotation> hashMap, Object obj) {
         for (Map.Entry<Method, Annotation> method : hashMap.entrySet()) {
             if (method.getValue() == (method.getKey().getAnnotation(Before.class))) {
                 try {
-                    method.getKey().invoke(null);
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    System.out.println("Test Fell");
+                    obj.getClass().getMethod(method.getKey().getName()).invoke(null);
+                } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                    System.out.println("Fell in Before Metod");
                     theTestFell++;
                     testFellFlag = true;
                     break;
@@ -68,12 +74,12 @@ public class DIYTestFramework {
         }
     }
 
-    private void runAnnotatedMethodTest(HashMap<Method, Annotation> hashMap) {
+    private void runAnnotatedMethodTest(HashMap<Method, Annotation> hashMap, Object obj) {
         for (Map.Entry<Method, Annotation> method : hashMap.entrySet()) {
             if (!testFellFlag) {
                 if (method.getValue() == (method.getKey().getAnnotation(Test.class))) {
                     try {
-                        method.getKey().invoke(null);
+                        obj.getClass().getMethod(method.getKey().getName()).invoke(null);
                         theTestPassed++;
                     } catch (Exception e) {
                         System.out.println("Test Fell");
@@ -89,19 +95,15 @@ public class DIYTestFramework {
         }
     }
 
-    private void runAnnotatedMethodAfter(HashMap<Method, Annotation> hashMap) {
+    private void runAnnotatedMethodAfter(HashMap<Method, Annotation> hashMap, Object obj) {
         for (Map.Entry<Method, Annotation> method : hashMap.entrySet()) {
-            if (!testFellFlag) {
-                if (method.getValue() == (method.getKey().getAnnotation(After.class))) {
-                    try {
-                        method.getKey().invoke(null);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        System.out.println("Test Fell");
-                        theTestFell++;
-                    }
+            if (method.getValue() == (method.getKey().getAnnotation(After.class))) {
+                try {
+                    obj.getClass().getMethod(method.getKey().getName()).invoke(null);
+                } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                    System.out.println("Fell in After Metod");
+                    theTestFell++;
                 }
-            } else {
-                break;
             }
         }
     }
