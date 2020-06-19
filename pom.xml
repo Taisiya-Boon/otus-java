@@ -13,6 +13,7 @@
     <modules>
         <module>hw01-maven</module>
         <module>hw03-generics-collections</module>
+        <module>hw09-annotations</module>
         <module>hw11-solid</module>
         <module>hw13-structural-patterns</module>
         <module>hw15-io</module>
