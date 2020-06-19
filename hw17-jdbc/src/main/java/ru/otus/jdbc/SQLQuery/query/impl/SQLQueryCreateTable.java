@@ -6,6 +6,10 @@ import ru.otus.jdbc.SQLQuery.SQlQuery;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
+
+import static java.util.Map.entry;
 
 public class SQLQueryCreateTable implements SQlQuery {
 
@@ -26,9 +30,9 @@ public class SQLQueryCreateTable implements SQlQuery {
                 firstFlag = false;
             }
             if (field.isAnnotationPresent(Id.class)) {
-                sField.append(field.getName()).append(toSQLType(field.getType())).append(" NOT NULL auto_increment");
+                sField.append(field.getName()).append(typeToSqlStrin.getOrDefault(field.getType(), " varchar(255)")).append(" NOT NULL auto_increment");
             } else {
-                sField.append(field.getName()).append(toSQLType(field.getType()));
+                sField.append(field.getName()).append(typeToSqlStrin.getOrDefault(field.getType(), " varchar(255)"));
             }
             field.setAccessible(false);
         }
@@ -36,24 +40,21 @@ public class SQLQueryCreateTable implements SQlQuery {
         return s.toString();
     }
 
-    private String toSQLType(Type type) {
-        if (type == int.class || type == Integer.class) {
-            return " int(3)";
-        } else if (type == long.class || type == Long.class) {
-            return " bigint(20)";
-        } else if (type == String.class || type == char.class) {
-            return " varchar(255)";
-        } else if (type == double.class || type == Double.class) {
-            return " double";
-        } else if (type == boolean.class || type == Boolean.class) {
-            return " bit";
-        } else if (type == float.class || type == Float.class) {
-            return " float";
-        } else if (type == BigDecimal.class) {
-            return " number";
-        } else {
-            return " varchar(255)";
-        }
-    }
+    private Map<Class, String> typeToSqlStrin = Map.ofEntries(
+            entry(int.class, " int(3)"),
+            entry(Integer.class, " int(3)"),
+            entry(long.class, " bigint(20)"),
+            entry(Long.class, " bigint(20)"),
+            entry(String.class, " varchar(255)"),
+            entry(char.class, " varchar(255)"),
+            entry(double.class, " double"),
+            entry(Double.class, " double"),
+            entry(boolean.class, " bit"),
+            entry(Boolean.class, " bit"),
+            entry(float.class, " float"),
+            entry(Float.class, " float"),
+            entry(BigDecimal.class, " number"),
+            entry(Object.class, " varchar(255)")
+    );
 
 }

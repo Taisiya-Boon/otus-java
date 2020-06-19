@@ -11,12 +11,16 @@ import ru.otus.jdbc.sessionmanager.SessionManagerJdbc;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Optional;
+
+import static java.util.Map.entry;
 
 public class JdbcMapper<T> {
 
@@ -105,23 +109,8 @@ public class JdbcMapper<T> {
         for (Field field : clazz.getDeclaredFields()) {
             field.setAccessible(true);
             if (field.getType() == parameterTypes[i]) {
-                if (field.getType() == int.class || field.getType() == Integer.class) {
-                    list.add(resultSet.getInt(field.getName()));
-                } else if (field.getType() == long.class || field.getType() == Long.class) {
-                    list.add(resultSet.getLong(field.getName()));
-                } else if (field.getType() == String.class || field.getType() == char.class) {
-                    list.add(resultSet.getString(field.getName()));
-                } else if (field.getType() == double.class || field.getType() == Double.class) {
-                    list.add(resultSet.getDouble(field.getName()));
-                } else if (field.getType() == boolean.class || field.getType() == Boolean.class) {
-                    list.add(resultSet.getBoolean(field.getName()));
-                } else if (field.getType() == float.class || field.getType() == Float.class) {
-                    list.add(resultSet.getFloat(field.getName()));
-                } else if (field.getType() == BigDecimal.class) {
-                    list.add(resultSet.getBigDecimal(field.getName()));
-                } else {
-                    list.add(resultSet.getString(field.getName()));
-                }
+                SetOnTypeFactory.Setter setter = SetOnTypeFactory.getSetter(field.getType());
+                list.add(setter.toObject(resultSet, field));
                 field.setAccessible(false);
                 i++;
                 if (i == parameterTypes.length) {
@@ -130,6 +119,82 @@ public class JdbcMapper<T> {
             }
         }
         return list.toArray();
+    }
+
+    private static class SetOnTypeFactory{
+         private static Setter getSetter(Type type) {
+             return setOnTypeMap.getOrDefault(type, new SetString());
+         }
+
+        private static Map<Class, Setter> setOnTypeMap = Map.ofEntries(
+                entry(int.class, new SetInt()),
+                entry(Integer.class, new SetInt()),
+                entry(long.class, new SetLong()),
+                entry(Long.class, new SetLong()),
+                entry(String.class, new SetString()),
+                entry(char.class, new SetString()),
+                entry(double.class, new SetDouble()),
+                entry(Double.class, new SetDouble()),
+                entry(boolean.class, new SetBoolean()),
+                entry(Boolean.class, new SetBoolean()),
+                entry(float.class, new SetFloat()),
+                entry(Float.class, new SetFloat()),
+                entry(BigDecimal.class, new SetBigDecimal()),
+                entry(Object.class, new SetString())
+        );
+
+         private interface Setter {
+             Object toObject (ResultSet resultSet, Field field) throws SQLException;
+         }
+
+         private static class SetString implements Setter {
+             @Override
+             public Object toObject(ResultSet resultSet, Field field) throws SQLException {
+                 return resultSet.getString(field.getName());
+             }
+         }
+
+        private static class SetInt implements Setter {
+            @Override
+            public Object toObject(ResultSet resultSet, Field field) throws SQLException {
+                return resultSet.getInt(field.getName());
+            }
+        }
+
+        private static class SetLong implements Setter {
+            @Override
+            public Object toObject(ResultSet resultSet, Field field) throws SQLException {
+                return resultSet.getLong(field.getName());
+            }
+        }
+
+        private static class SetDouble implements Setter {
+            @Override
+            public Object toObject(ResultSet resultSet, Field field) throws SQLException {
+                return resultSet.getDouble(field.getName());
+            }
+        }
+
+        private static class SetFloat implements Setter {
+            @Override
+            public Object toObject(ResultSet resultSet, Field field) throws SQLException {
+                return resultSet.getFloat(field.getName());
+            }
+        }
+
+        private static class SetBoolean implements Setter {
+            @Override
+            public Object toObject(ResultSet resultSet, Field field) throws SQLException {
+                return resultSet.getBoolean(field.getName());
+            }
+        }
+
+        private static class SetBigDecimal implements Setter {
+            @Override
+            public Object toObject(ResultSet resultSet, Field field) throws SQLException {
+                return resultSet.getBigDecimal(field.getName());
+            }
+        }
     }
 
 }

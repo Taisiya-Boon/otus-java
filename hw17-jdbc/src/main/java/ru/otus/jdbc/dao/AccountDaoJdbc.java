@@ -3,7 +3,7 @@ package ru.otus.jdbc.dao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.otus.core.dao.AccountDao;
-import ru.otus.core.dao.AccountDaoException;
+import ru.otus.core.dao.UserDaoException;
 import ru.otus.core.model.Account;
 import ru.otus.core.sessionmanager.SessionManager;
 import ru.otus.jdbc.JdbcMapper;
@@ -39,7 +39,7 @@ public class AccountDaoJdbc implements AccountDao {
             return jdbcMapper.create(account);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            throw new AccountDaoException(e);
+            throw new UserDaoException(e);
         }
     }
 
