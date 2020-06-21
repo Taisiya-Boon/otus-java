@@ -17,6 +17,7 @@
         <module>hw11-solid</module>
         <module>hw13-structural-patterns</module>
         <module>hw15-io</module>
+        <module>hw17-jdbc</module>
     </modules>
 
     <properties>
@@ -25,6 +26,8 @@
         <maven.compiler.target>12</maven.compiler.target>
         <com.google.guava.version>28.1-jre</com.google.guava.version>
         <org.apache.maven.plugins.version>3.1.1</org.apache.maven.plugins.version>
+
+        <spring-boot.version>2.2.5.RELEASE</spring-boot.version>
 
         <lombok.version>1.18.10</lombok.version>
         <lombok-maven-plugin.version>1.18.8.1</lombok-maven-plugin.version>
@@ -42,6 +45,15 @@
 
     <dependencyManagement>
         <dependencies>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
