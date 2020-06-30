@@ -15,8 +15,9 @@ public class PhoneDataSet {
     @Column(name = "number")
     private String number;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    public User user;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     public PhoneDataSet() {
 

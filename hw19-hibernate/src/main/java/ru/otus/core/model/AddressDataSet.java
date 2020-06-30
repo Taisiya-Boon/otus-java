@@ -14,7 +14,7 @@ public class AddressDataSet {
 
     @OneToOne
     @JoinColumn(name = "user_id")
-    public User user;
+    private User user;
 
     @Column(name = "street")
     private String street;

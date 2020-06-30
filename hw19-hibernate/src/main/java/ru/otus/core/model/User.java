@@ -33,7 +33,11 @@ public class User {
         this.id = id;
         this.name = name;
         this.addressDataSet = addressDataSet;
+        addressDataSet.setUser(this);
         this.phoneDataSet = phoneDataSet;
+        for (PhoneDataSet phone : phoneDataSet) {
+            phone.setUser(this);
+        }
     }
 
     public long getId() {
