@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 import ru.otus.core.dao.UserDao;
+import ru.otus.core.service.DbServiceUserWithCacheImpl;
 import ru.otus.jdbc.JdbcMapper;
 import ru.otus.jdbc.SQLQuery.Query;
 import ru.otus.jdbc.SQLQuery.SQLQueryFactory;
@@ -32,12 +33,12 @@ public class DbServiceDemo {
         long startTimeWithoutCache = System.currentTimeMillis();
         withoutCache();
         long finishTimeWithoutCache = System.currentTimeMillis();
-        logger.info("without cache, start:{}, finish:{}, time:{}", startTimeWithoutCache, finishTimeWithoutCache, finishTimeWithoutCache - startTimeWithoutCache);
+        logger.info("without cache, time:{}", finishTimeWithoutCache - startTimeWithoutCache);
 
         long startTimeWithCache = System.currentTimeMillis();
         withCache();
         long finishTimeWithCache = System.currentTimeMillis();
-        logger.info("with cache, start:{}, finish:{}, time:{}", startTimeWithCache, finishTimeWithCache, finishTimeWithCache - startTimeWithCache);
+        logger.info("with cache, time:{}", finishTimeWithCache - startTimeWithCache);
 
 
         resettingTheCache();
@@ -52,9 +53,25 @@ public class DbServiceDemo {
         demo.createTable(dataSource, userT);
     }
 
-    private static void withoutCache() throws Exception {
-        DBServiceUser dbServiceUser = setDbService();
+    private static void withoutCache() {
+        testDbService(new DbServiceUserImpl(setUserDao()));
+    }
 
+    private static void withCache() {
+        testDbService(new DbServiceUserWithCacheImpl(setUserDao()));
+    }
+
+    private static UserDao setUserDao() {
+        DataSource dataSource = new DataSourceH2();
+
+        SessionManagerJdbc sessionManager = new SessionManagerJdbc(dataSource);
+        DbExecutor dbExecutor = new DbExecutor<>();
+        JdbcMapper jdbcMapper = new JdbcMapper(sessionManager, dbExecutor);
+
+        return new UserDaoJdbc(sessionManager, jdbcMapper);
+    }
+
+    private static void testDbService(DBServiceUser dbServiceUser) {
         long[] idArray = new long[10];
         for (int i = 0; i < 10; i++) {
             idArray[i] = dbServiceUser.saveUser(new User(0, "user" + i, 20 + i));
@@ -64,41 +81,6 @@ public class DbServiceDemo {
         for (int i = 0; i < 10; i++) {
             users.add(i, dbServiceUser.getUser(idArray[i]));
         }
-
-    }
-
-    private static void withCache() throws Exception {
-        DBServiceUser dbServiceUser = setDbService();
-
-        MyCache<String, User> myCache = new MyCache<>();
-
-        long[] idArray = new long[10];
-        for (int i = 0; i < 10; i++) {
-            idArray[i] = dbServiceUser.saveUser(new User(0, "user" + i, 20 + i));
-            myCache.put("" + idArray[i], new User(0, "user" + i, 20 + i));
-        }
-
-        ArrayList<User> users = new ArrayList();
-        for (int i = 0; i < 10; i++) {
-            if (myCache.get(""+idArray[i]) != null) {
-                users.add(i, myCache.get(""+idArray[i]));
-            } else {
-                users.add(i, dbServiceUser.getUser(idArray[i]).get());
-            }
-        }
-
-    }
-
-    private static DBServiceUser setDbService() {
-        DataSource dataSource = new DataSourceH2();
-
-        SessionManagerJdbc sessionManager = new SessionManagerJdbc(dataSource);
-        DbExecutor dbExecutor = new DbExecutor<>();
-        JdbcMapper jdbcMapper = new JdbcMapper(sessionManager, dbExecutor);
-
-        UserDao userDao = new UserDaoJdbc(sessionManager, jdbcMapper);
-
-        return new DbServiceUserImpl(userDao);
     }
 
     private void createTable(DataSource dataSource, Object object) throws SQLException {
@@ -111,7 +93,7 @@ public class DbServiceDemo {
     }
 
     private static void resettingTheCache() {
-        DBServiceUser dbServiceUser = setDbService();
+        DBServiceUser dbServiceUser =  new DbServiceUserImpl(setUserDao());
 
         MyCache<String, User> myCache = new MyCache<>();
 

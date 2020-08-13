@@ -3,7 +3,6 @@ package ru.otus;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.WeakHashMap;
 
 /**
@@ -19,20 +18,12 @@ public class MyCache<K, V> implements HwCache<K, V> {
   @Override
   public void put(K key, V value) {
     cache.put(key, value);
-    for (WeakReference<HwListener<K, V>> listener : listeners) {
-        if (listener.get() != null) {
-            listener.get().notify(key, value, "put");
-        }
-    }
+    observer(key, value, "put");
   }
 
   @Override
   public void remove(K key) {
-    for (WeakReference<HwListener<K, V>> listener : listeners) {
-      if (listener.get() != null) {
-         listener.get().notify(key, cache.get(key), "remove");
-      }
-    }
+    observer(key, cache.get(key), "remove");
     cache.remove(key);
   }
 
@@ -42,6 +33,15 @@ public class MyCache<K, V> implements HwCache<K, V> {
   }
   public long getIn() {
     return cache.size();
+  }
+
+  private void observer(K key, V value, String action) {
+    for (WeakReference<HwListener<K, V>> listener : listeners) {
+      var ref = listener.get();
+      if (ref != null) {
+        ref.notify(key, value, action);
+      }
+    }
   }
 
   @Override
