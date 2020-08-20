@@ -13,15 +13,15 @@ import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static java.util.Map.entry;
 import static org.objectweb.asm.Opcodes.H_INVOKESTATIC;
 
 public class Agent {
 
-    private static final ArrayList<String> methodsName = new ArrayList<>();
-    private static final HashMap<String, String> descMethods = new HashMap<>();
-    private static final HashMap<String, String> annotationMethods = new HashMap<>();
+    private static final ArrayList<MethodInfo> methods = new ArrayList<>();
+    private static final HashMap<MethodInfo.Descriptor, String> descCache = new HashMap<>();
 
     public static void premain(String agentArgs, Instrumentation inst) {
         inst.addTransformer(new ClassFileTransformer() {
@@ -47,19 +47,19 @@ public class Agent {
         ClassVisitor cv = new ClassVisitor(Opcodes.ASM7, cw) {
             @Override
             public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-                if (annotationMethods.containsKey(name)) {
-                    return super.visitMethod(access, name + "Proxied", descriptor, signature, exceptions);
-                } else {
-                    return super.visitMethod(access, name, descriptor, signature, exceptions);
+                for (MethodInfo method : methods) {
+                    if (method.getName().equals(name) && method.getDescriptor().getDesc().equals(descriptor) && !method.getAnnotationList().isEmpty()) {
+                        return super.visitMethod(access, name + "Proxied", descriptor, signature, exceptions);
+                    }
                 }
+                return super.visitMethod(access, name, descriptor, signature, exceptions);
             }
         };
         cr.accept(cv, Opcodes.ASM5);
 
-
-        for (Map.Entry<String, String> name : annotationMethods.entrySet()) {
-            if (name.getValue().equals("Lru/otus/Log;")) {
-                MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PUBLIC, name.getKey(), descMethods.get(name.getKey()), null, null);
+        for (MethodInfo method : methods) {
+            if (!method.getAnnotationList().isEmpty()) {
+                MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PUBLIC, method.getName(), method.getDescriptor().getDesc(), null, null);
 
                 Handle handle = new Handle(
                         H_INVOKESTATIC,
@@ -70,15 +70,43 @@ public class Agent {
 
                 mv.visitCode();
 
-                mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
-                mv.visitVarInsn(setOnOpcodes(descMethods.get(name.getKey())), 1);
-                mv.visitInvokeDynamicInsn("makeConcatWithConstants", "(" + setOnType(descMethods.get(name.getKey())) + ")Ljava/lang/String;", handle, "executed method: " + name.getKey() + ", param: \u0001");
+                if (method.getAnnotationList().contains("Lru/otus/Log;")) {
+                    setOnType(method.getDescriptor());
+                    for (int i = 1; i <= method.getDescriptor().getParam().size(); i++) {
+                        mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
 
-                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
+                        mv.visitVarInsn(setOnOpcodes(method.getDescriptor().getParam().get(i-1)), i);
+
+                        if (method.getDescriptor().getParam().size() == 1) {
+                            mv.visitInvokeDynamicInsn("makeConcatWithConstants", "(" + method.getDescriptor().getParam().get(i-1) + ")Ljava/lang/String;", handle, "executed method: " + method.getName() + ", param: \u0001");
+
+                            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
+                        } else {
+                            if (i == 1) {
+                                mv.visitInvokeDynamicInsn("makeConcatWithConstants", "(" + method.getDescriptor().getParam().get(i - 1) + ")Ljava/lang/String;", handle, "executed method: " + method.getName() + ", param " + i + ": \u0001");
+
+                                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "print", "(Ljava/lang/String;)V", false);
+                            } else if (i == method.getDescriptor().getParam().size()) {
+                                mv.visitInvokeDynamicInsn("makeConcatWithConstants", "(" + method.getDescriptor().getParam().get(i - 1) + ")Ljava/lang/String;", handle, ", param " + i + ": \u0001");
+
+                                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
+                            } else {
+                                mv.visitInvokeDynamicInsn("makeConcatWithConstants", "(" + method.getDescriptor().getParam().get(i - 1) + ")Ljava/lang/String;", handle, ", param " + i + ": \u0001");
+
+                                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "print", "(Ljava/lang/String;)V", false);
+                            }
+                        }
+                    }
+                }
 
                 mv.visitVarInsn(Opcodes.ALOAD, 0);
-                mv.visitVarInsn(setOnOpcodes(descMethods.get(name.getKey())), 1);
-                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "ru/otus/MyClass", name.getKey() + "Proxied", descMethods.get(name.getKey()), false);
+                setOnType(method.getDescriptor());
+                int i = 1;
+                for (String desc : method.getDescriptor().getParam()) {
+                    mv.visitVarInsn(setOnOpcodes(desc), i);
+                    i++;
+                }
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "ru/otus/MyClass", method.getName() + "Proxied", method.getDescriptor().getDesc(), false);
 
                 mv.visitInsn(Opcodes.RETURN);
                 mv.visitMaxs(0, 0);
@@ -102,34 +130,56 @@ public class Agent {
         ClassVisitor visitor = new ClassVisitor(Opcodes.ASM7, writer) {
             @Override
             public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-                methodsName.add(name);
-                descMethods.put(name, descriptor);
+                methods.add(new MethodInfo(name, descriptor));
                 return new MethodAnnotationScanner(super.visitMethod(access, name, descriptor, signature, exceptions));
             }
         };
         reader.accept(visitor, Opcodes.ASM5);
     }
 
-    private static String setOnType(String desc) {
-        boolean flag = false;
-        StringBuilder type = new StringBuilder();
-        for (char ch : desc.toCharArray()) {
-            if (ch ==')') {
-                flag = false;
+    private static String setOnType(MethodInfo.Descriptor desc) {
+        if (descCache.containsKey(desc)) {
+            return descCache.get(desc);
+        } else {
+            boolean flag = false;
+            boolean flagDesc = false;
+            StringBuilder type = new StringBuilder();
+            StringBuilder typeDesc = new StringBuilder();
+            for (char ch : desc.getDesc().toCharArray()) {
+                if (ch == ')') {
+                    flag = false;
+                }
+                if (flag) {
+                    if (ch == 'L') {
+                        flagDesc = true;
+                    }
+                    if (flagDesc) {
+                        typeDesc.append(ch);
+                    }
+                    if (ch == ';') {
+                        flagDesc = false;
+                    }
+                    if (!flagDesc) {
+                        if (typeDesc.toString().equals("")) {
+                            desc.addParam("" + ch);
+                        } else {
+                            desc.addParam(typeDesc.toString());
+                            typeDesc.delete(0, typeDesc.toString().length() - 1);
+                        }
+                    }
+                    type.append(ch);
+                }
+                if (ch == '(') {
+                    flag = true;
+                }
             }
-            if (flag) {
-                type.append(ch);
-            }
-            if (ch == '(') {
-                flag = true;
-            }
+            descCache.put(desc, type.toString());
+            return type.toString();
         }
-        return type.toString();
     }
 
     private static int setOnOpcodes(String desc) {
-        String type = setOnType(desc);
-        return setOnTypeMap.getOrDefault(type, Opcodes.ALOAD);
+        return setOnTypeMap.getOrDefault(desc, Opcodes.ALOAD);
     }
 
     private static final Map<String, Integer> setOnTypeMap = Map.ofEntries(
@@ -154,11 +204,90 @@ public class Agent {
         @Override
         public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
             if (visible && desc.equals("Lru/otus/Log;")) {
-                annotationMethods.put(methodsName.get(methodsName.size() - 1), desc);
+                methods.get(methods.size()-1).addAnnotation(desc);
             }
             return super.visitAnnotation(desc, visible);
         }
 
+    }
+
+    private static class MethodInfo {
+
+        private final String name;
+        private final Descriptor descriptor;
+        private final ArrayList<String> annotation = new ArrayList<>();
+
+        public MethodInfo(String name, String descriptor) {
+            this.name = name;
+            this.descriptor = new Descriptor(descriptor);
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public Descriptor getDescriptor() {
+            return descriptor;
+        }
+
+        public ArrayList<String> getAnnotationList() {
+            return annotation;
+        }
+
+        public void addAnnotation(String annotationDesc) {
+            annotation.add(annotationDesc);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof MethodInfo)) return false;
+            MethodInfo that = (MethodInfo) o;
+            return name.equals(that.name) &&
+                    descriptor.equals(that.descriptor) &&
+                    Objects.equals(annotation, that.annotation);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name, descriptor, annotation);
+        }
+
+        private static class Descriptor {
+
+            private final String desc;
+            private final ArrayList<String> param = new ArrayList<>();
+
+            public Descriptor(String desc) {
+                this.desc = desc;
+            }
+
+            public ArrayList<String> getParam() {
+                return param;
+            }
+
+            public String getDesc() {
+                return desc;
+            }
+
+            public void addParam(String param) {
+                this.param.add(param);
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (!(o instanceof Descriptor)) return false;
+                Descriptor that = (Descriptor) o;
+                return Objects.equals(desc, that.desc) &&
+                        param.equals(that.param);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(desc, param);
+            }
+        }
     }
 
 }

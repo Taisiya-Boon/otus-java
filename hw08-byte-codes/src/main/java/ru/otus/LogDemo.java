@@ -10,6 +10,7 @@ public class LogDemo {
         myClass.calculation(4);
         myClass.doubleReader(2.5);
         myClass.writer("hello");
+        myClass.calculation(3, 7);
     }
 
 }

@@ -2,9 +2,13 @@ package ru.otus;
 
 public class MyClass {
 
-    @Log
     public void calculation(int param) {
         System.out.println("metod work. param: " + param);
+    }
+
+    @Log
+    public void calculation(int param1, int param2) {
+        System.out.println("metod work. param 1: " + param1 + ", param 2:" + param2);
     }
 
     @Log
