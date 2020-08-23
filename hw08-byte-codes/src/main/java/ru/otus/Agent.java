@@ -89,10 +89,12 @@ public class Agent {
                             } else if (i == method.getDescriptor().getParam().size()) {
                                 mv.visitInvokeDynamicInsn("makeConcatWithConstants", "(" + method.getDescriptor().getParam().get(i - 1) + ")Ljava/lang/String;", handle, ", param " + i + ": \u0001");
 
+                                // Если параметр последний вызывается функция println.
                                 mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
                             } else {
                                 mv.visitInvokeDynamicInsn("makeConcatWithConstants", "(" + method.getDescriptor().getParam().get(i - 1) + ")Ljava/lang/String;", handle, ", param " + i + ": \u0001");
 
+                                // Если параметр не последний вызывается функция print.
                                 mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "print", "(Ljava/lang/String;)V", false);
                             }
                         }
