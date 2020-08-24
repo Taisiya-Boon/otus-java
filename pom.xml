@@ -13,6 +13,7 @@
     <modules>
         <module>hw01-maven</module>
         <module>hw03-generics-collections</module>
+        <module>hw08-byte-codes</module>
         <module>hw09-annotations</module>
         <module>hw11-solid</module>
         <module>hw13-structural-patterns</module>
@@ -28,6 +29,9 @@
         <maven.compiler.target>12</maven.compiler.target>
         <com.google.guava.version>28.1-jre</com.google.guava.version>
         <org.apache.maven.plugins.version>3.1.1</org.apache.maven.plugins.version>
+        <maven-shade-plugin.version>3.2.1</maven-shade-plugin.version>
+
+        <asm.version>7.3.1</asm.version>
 
         <spring-boot.version>2.2.5.RELEASE</spring-boot.version>
 
@@ -67,6 +71,11 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${com.google.guava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm-commons</artifactId>
+                <version>${asm.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.projectlombok</groupId>
@@ -144,6 +153,10 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-assembly-plugin</artifactId>
                     <version>${org.apache.maven.plugins.version}</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>${maven-shade-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.projectlombok</groupId>
