@@ -21,6 +21,7 @@
         <module>hw17-jdbc</module>
         <module>hw19-hibernate</module>         
         <module>hw21-cache</module>
+        <module>hw23-web-server</module>
     </modules>
 
     <properties>
@@ -54,6 +55,9 @@
         <hibernate.version>5.4.4.Final</hibernate.version>
       
         <ehcache.version>3.8.1</ehcache.version>
+
+        <jetty.version>9.4.27.v20200227</jetty.version>
+        <freemarker.version>2.3.28</freemarker.version>
     </properties>
 
     <dependencyManagement>
@@ -142,6 +146,26 @@
                 <groupId>org.ehcache</groupId>
                 <artifactId>ehcache</artifactId>
                 <version>${ehcache.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-server</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-webapp</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-security</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.freemarker</groupId>
+                <artifactId>freemarker</artifactId>
+                <version>${freemarker.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
