@@ -1,8 +1,6 @@
 package ru.otus.server;
 
 import com.google.gson.Gson;
-import lombok.AllArgsConstructor;
-import org.eclipse.jetty.security.ConstraintMapping;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.LoginService;
 import org.eclipse.jetty.server.Handler;
@@ -12,7 +10,6 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.util.security.Constraint;
 import ru.otus.core.service.DbServiceUserWeb;
 import ru.otus.helpers.FileSystemHelper;
 import ru.otus.services.TemplateProcessor;
@@ -24,7 +21,6 @@ import ru.otus.servlet.UsersServlet;
 
 import java.util.Arrays;
 
-@AllArgsConstructor
 public class UserWebServerImpl implements UserWebServer {
     private static final String START_PAGE_NAME = "index.html";
     private static final String COMMON_RESOURCES_DIR = "static";
@@ -38,6 +34,15 @@ public class UserWebServerImpl implements UserWebServer {
     protected final TemplateProcessor templateProcessor;
     private final LoginService loginService;
     private final Server server;
+
+    public UserWebServerImpl(int port, DbServiceUserWeb dbService, UserAuthService authService, Gson gson, TemplateProcessor templateProcessor, LoginService loginService) {
+        this.dbService = dbService;
+        this. authService = authService;
+        this.gson = gson;
+        this.loginService = loginService;
+        this.templateProcessor = templateProcessor;
+        this.server = new Server(port);
+    }
 
     @Override
     public void start() throws Exception {

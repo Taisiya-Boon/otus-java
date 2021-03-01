@@ -1,5 +1,6 @@
 package ru.otus.services;
 
+import lombok.RequiredArgsConstructor;
 import org.eclipse.jetty.security.AbstractLoginService;
 import org.eclipse.jetty.util.security.Password;
 import ru.otus.core.model.User;
@@ -7,13 +8,10 @@ import ru.otus.core.service.DbServiceUserWeb;
 
 import java.util.Optional;
 
+@RequiredArgsConstructor
 public class LoginServiceImpl extends AbstractLoginService {
 
     private final DbServiceUserWeb dbServiceUserWeb;
-
-    public LoginServiceImpl(DbServiceUserWeb dbServiceUserWeb) {
-        this.dbServiceUserWeb = dbServiceUserWeb;
-    }
 
     @Override
     protected String[] loadRoleInfo(UserPrincipal userPrincipal) {

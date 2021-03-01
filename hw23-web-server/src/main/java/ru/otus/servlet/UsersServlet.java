@@ -8,7 +8,6 @@ import ru.otus.services.TemplateProcessor;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -33,14 +32,14 @@ public class UsersServlet extends HttpServlet {
         List<User> users = dbServiceUserWeb.getAllUsers();
         paramsMap.put(TEMPLATE_ATTR_USERS, users);
 
-        Session session = (Session) req.getSession();
-        Long id = Long.valueOf(session.getExtendedId());
+//        Session session = (Session) req.getSession();
+//        Long id = Long.valueOf(session.getExtendedId());
         boolean adminFlag = false;
-        if (dbServiceUserWeb.getUser(id).isPresent()) {
-            if (dbServiceUserWeb.getUser(id).get().getAdminFlag()) {
-                adminFlag = true;
-            }
-        }
+//        if (dbServiceUserWeb.getUser(id).isPresent()) {
+//            if (dbServiceUserWeb.getUser(id).get().getAdminFlag()) {
+//                adminFlag = true;
+//            }
+//        }
         paramsMap.put(TEMPLATE_ATTR_USER_AUTH, adminFlag);
 
         response.setContentType("text/html");
