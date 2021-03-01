@@ -1,6 +1,10 @@
 package ru.otus.server;
 
 import com.google.gson.Gson;
+import lombok.AllArgsConstructor;
+import org.eclipse.jetty.security.ConstraintMapping;
+import org.eclipse.jetty.security.ConstraintSecurityHandler;
+import org.eclipse.jetty.security.LoginService;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
@@ -8,6 +12,7 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.security.Constraint;
 import ru.otus.core.service.DbServiceUserWeb;
 import ru.otus.helpers.FileSystemHelper;
 import ru.otus.services.TemplateProcessor;
@@ -19,23 +24,20 @@ import ru.otus.servlet.UsersServlet;
 
 import java.util.Arrays;
 
+@AllArgsConstructor
 public class UserWebServerImpl implements UserWebServer {
     private static final String START_PAGE_NAME = "index.html";
     private static final String COMMON_RESOURCES_DIR = "static";
+
+    private static final String ROLE_NAME_USER = "user";
+    private static final String ROLE_NAME_ADMIN = "admin";
 
     private final DbServiceUserWeb dbService;
     private final UserAuthService authService;
     private final Gson gson;
     protected final TemplateProcessor templateProcessor;
+    private final LoginService loginService;
     private final Server server;
-
-    public UserWebServerImpl(int port, DbServiceUserWeb dbService, UserAuthService authService, Gson gson, TemplateProcessor templateProcessor) {
-        this.dbService = dbService;
-        this.authService = authService;
-        this.gson = gson;
-        this.templateProcessor = templateProcessor;
-        server = new Server(port);
-    }
 
     @Override
     public void start() throws Exception {
@@ -72,7 +74,14 @@ public class UserWebServerImpl implements UserWebServer {
         servletContextHandler.addServlet(new ServletHolder(new LoginServlet(templateProcessor, authService)), "/login");
         AuthorizationFilter authorizationFilter = new AuthorizationFilter();
         Arrays.stream(paths).forEachOrdered(path -> servletContextHandler.addFilter(new FilterHolder(authorizationFilter), path, null));
-        return servletContextHandler;
+
+        ConstraintSecurityHandler securityHandler = new ConstraintSecurityHandler();
+        securityHandler.addRole(ROLE_NAME_USER);
+        securityHandler.addRole(ROLE_NAME_ADMIN);
+        securityHandler.setLoginService(loginService);
+        securityHandler.setHandler(servletContextHandler);
+
+        return securityHandler;
     }
 
     private ResourceHandler createResourceHandler() {

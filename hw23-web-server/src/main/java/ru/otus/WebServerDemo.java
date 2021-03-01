@@ -17,10 +17,7 @@ import ru.otus.hibernate.HibernateUtils;
 import ru.otus.hibernate.sessionmanager.SessionManagerHibernate;
 import ru.otus.server.UserWebServer;
 import ru.otus.server.UserWebServerImpl;
-import ru.otus.services.TemplateProcessor;
-import ru.otus.services.TemplateProcessorImpl;
-import ru.otus.services.UserAuthService;
-import ru.otus.services.UserAuthServiceImpl;
+import ru.otus.services.*;
 
 /*
     Полезные для демо ссылки
@@ -51,9 +48,10 @@ public class WebServerDemo {
         TemplateProcessor templateProcessor = new TemplateProcessorImpl(TEMPLATES_DIR);
 
         UserAuthService userAuthService = new UserAuthServiceImpl(dbServiceUserWeb);
+        LoginService loginService = new LoginServiceImpl(dbServiceUserWeb);
 
         UserWebServer usersWebServer = new UserWebServerImpl(WEB_SERVER_PORT,
-                    dbServiceUserWeb, userAuthService, gson, templateProcessor);
+                    dbServiceUserWeb, userAuthService, gson, templateProcessor, loginService);
 
         usersWebServer.start();
         usersWebServer.join();

@@ -15,12 +15,8 @@ public class UserAuthServiceImpl implements UserAuthService {
 
     @Override
     public boolean authenticate(String login, String password) {
-        if (dbService.getUserByLogin(login).isPresent()) {
-            logger.info("user with this login \'{}\' is trying to authenticate.", login);
-            return dbService.getUserByLogin(login).get().getPassword().equals(password);
-        } else {
-            logger.error("user with this login \'{}\' does not exist.", login);
-            throw new IllegalArgumentException("user with this login does not exist.");
-        }
+        return dbService.getUserByLogin(login)
+                    .map(user -> user.getPassword().equals(password))
+                    .orElse(false);
     }
 }
