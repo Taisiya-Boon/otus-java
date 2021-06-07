@@ -14,10 +14,7 @@ import ru.otus.core.service.DbServiceUserWeb;
 import ru.otus.helpers.FileSystemHelper;
 import ru.otus.services.TemplateProcessor;
 import ru.otus.services.UserAuthService;
-import ru.otus.servlet.AuthorizationFilter;
-import ru.otus.servlet.LoginServlet;
-import ru.otus.servlet.UserApiServlet;
-import ru.otus.servlet.UsersServlet;
+import ru.otus.servlet.*;
 
 import java.util.Arrays;
 
@@ -37,7 +34,7 @@ public class UserWebServerImpl implements UserWebServer {
 
     public UserWebServerImpl(int port, DbServiceUserWeb dbService, UserAuthService authService, Gson gson, TemplateProcessor templateProcessor, LoginService loginService) {
         this.dbService = dbService;
-        this. authService = authService;
+        this.authService = authService;
         this.gson = gson;
         this.loginService = loginService;
         this.templateProcessor = templateProcessor;
@@ -100,6 +97,8 @@ public class UserWebServerImpl implements UserWebServer {
     private ServletContextHandler createServletContextHandler() {
         ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletContextHandler.addServlet(new ServletHolder(new UsersServlet(templateProcessor, dbService)), "/users");
+        servletContextHandler.addServlet(new ServletHolder(new AdminServlet(templateProcessor, dbService)), "/admin");
+        servletContextHandler.addServlet(new ServletHolder(new ExitServlet()), "/exit");
         servletContextHandler.addServlet(new ServletHolder(new UserApiServlet(dbService, gson)), "/api/user/*");
         return servletContextHandler;
     }

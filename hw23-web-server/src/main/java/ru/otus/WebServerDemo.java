@@ -2,17 +2,13 @@ package ru.otus;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.eclipse.jetty.security.HashLoginService;
 import org.eclipse.jetty.security.LoginService;
 import org.hibernate.SessionFactory;
 import ru.otus.core.dao.UserDaoWeb;
 import ru.otus.core.dao.UserDaoWebImpl;
-import ru.otus.core.model.AddressDataSet;
-import ru.otus.core.model.PhoneDataSet;
 import ru.otus.core.model.User;
 import ru.otus.core.service.DbServiceUserWeb;
 import ru.otus.core.service.DbServiceUserWebImpl;
-import ru.otus.helpers.FileSystemHelper;
 import ru.otus.hibernate.HibernateUtils;
 import ru.otus.hibernate.sessionmanager.SessionManagerHibernate;
 import ru.otus.server.UserWebServer;
@@ -27,6 +23,9 @@ import ru.otus.services.*;
 
     // Страница пользователей
     http://localhost:8080/users
+
+    // Страница админа
+    http://localhost:8080/admin
 
     // REST сервис
     http://localhost:8080/api/user/3
