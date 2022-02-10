@@ -51,7 +51,7 @@
         <assertj.version>3.13.2</assertj.version>
 
         <h2.version>1.4.200</h2.version>
-        <hibernate.version>5.4.4.Final</hibernate.version>
+        <hibernate.version>5.4.24.Final</hibernate.version>
       
         <ehcache.version>3.8.1</ehcache.version>
     </properties>
