@@ -1,0 +1,33 @@
+<html xmlns="http://www.w3.org/1999/xhtml" content="text/html;">
+<head>
+    <title>Users</title>
+</head>
+<body>
+<h4>Страница пользователя</h4>
+<#if adminFlag>
+<a href="admin">Перейти к админской страничке</a>
+</#if>
+<form action="exit" method="get">
+    <br/><br/>
+    <input type="submit" value="Выйти">
+</form>
+<table style="width: 400px">
+    <thead>
+    <tr>
+        <td style="width: 50px">Id</td>
+        <td style="width: 150px">Имя</td>
+        <td style="width: 100px">Логин</td>
+        <td style="width: 100px">Пароль</td>
+    </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>${User.id}</td>
+            <td>${User.name}</td>
+            <td>${User.login}</td>
+            <td>${User.password}</td>
+        </tr>
+    </tbody>
+</table>
+</body>
+</html>
